@@ -57,9 +57,46 @@ print(f"Cleaner time starts at {clean_time}")
 
 
 
-
-
 START_MARKER  = "# START Focus Timer - do not edit; managed by focus.py"
-
 END_MARKER  = "#END Focus Timer"   
 
+# Default list of all the blocked sites for this project
+
+blocked_sites = [
+#Anime Site:
+"https://9anime.me.uk/",
+#Youtube:
+"https://youtube.com",
+#SocialMedia:
+"https://instagram.com",
+"https://twitter.com",
+"https://titok.com",
+"https://facebook.com"
+]
+
+# ANSI colors codes for terminal
+class C:
+    RESET       ="\033[0m"
+    BOLD        ="\033[1m"
+    DIM         ="\033[2m"
+    RED         ="\033[31m"
+    GREEN       ="\033[32m" 
+    YELLOW      ="\033[33m"
+    CYAN        ="\033[36m"
+    BRIGHT_CYAN ="\033[96m"
+    BRIGHT_YEL  ="\033[96m"
+    HIDE_CURSOR ="\033[?25L"
+    SHOW_CURSOR ="\033[?25h]"
+    CLEAR_LINE  ="\033[K"
+
+def get_hosts_file() -> Path:
+    """Path to the system host files"""
+    if platform.system() =="Windows":
+        return Path(r"C:\Windows\System32\drivers\etc\hosts")
+    return Path("/etc/hosts")
+
+"""What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
+Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
+resolves to your own machine (127.0.0.1, "localhost") instead of the real site — so any attempt to visit it just fails to load. 
+That's the classic technique focus/blocker apps use to lock out distracting sites during a session, and it requires admin/root privileges 
+to edit (on Mac you'd need sudo to write to /etc/hosts)."""
