@@ -36,13 +36,25 @@
 import os               #Talks to the operating system: Environment variables and all
 import argparse         #Used to build CLI arguements as shown in the above comments
 from pathlib import Path    #Modern way to work with file paths (used to build a path to a log file)
-import subprocess 
+import subprocess           #This runs other programs adn commands fro within python and capture outputs
 import signal
 import atexit
 import platform
 import sys
 import time
 from datetime import datetime, timedelta
+
+
+parser = argparse.ArgumentParser(description='Starts focus timer')
+parser.add_argument('timed_start', metavar='timed_start', type=str, help='How many minutes would you like to focus: ')
+args = parser.parse_args()
+
+timed_start = time.time()
+clean_time = datetime.now()
+print(f"Timer started at {timed_start}")
+print(f"Cleaner time starts at {clean_time}")
+
+
 
 
 
