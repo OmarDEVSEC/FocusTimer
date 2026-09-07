@@ -45,14 +45,14 @@ import time
 from datetime import datetime, timedelta
 
 
-parser = argparse.ArgumentParser(description='Starts focus timer')
-parser.add_argument('timed_start', metavar='timed_start', type=str, help='How many minutes would you like to focus: ')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser(description='Starts focus timer')
+# parser.add_argument('timed_start', metavar='timed_start', type=str, help='How many minutes would you like to focus: ')
+# args = parser.parse_args()
 
-timed_start = time.time()
-clean_time = datetime.now()
-print(f"Timer started at {timed_start}")
-print(f"Cleaner time starts at {clean_time}")
+# timed_start = time.time()
+# clean_time = datetime.now()
+# print(f"Timer started at {timed_start}")
+# print(f"Cleaner time starts at {clean_time}")
 
 
 
@@ -95,8 +95,28 @@ def get_hosts_file() -> Path:
         return Path(r"C:\Windows\System32\drivers\etc\hosts")
     return Path("/etc/hosts")
 
-"""What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
-Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
-resolves to your own machine (127.0.0.1, "localhost") instead of the real site — so any attempt to visit it just fails to load. 
-That's the classic technique focus/blocker apps use to lock out distracting sites during a session, and it requires admin/root privileges 
-to edit (on Mac you'd need sudo to write to /etc/hosts)."""
+
+def countdown_timer(minutes):
+    while minutes > 0:
+        print(f"{GREEN}")
+        time.slee(1)
+        second -= 1
+
+        print(f"{RESET}")
+
+countdown_timer(14)
+
+
+
+
+
+
+
+
+
+
+# """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
+# Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
+# resolves to your own machine (127.0.0.1, "localhost") instead of the real site — so any attempt to visit it just fails to load. 
+# That's the classic technique focus/blocker apps use to lock out distracting sites during a session, and it requires admin/root privileges 
+# to edit (on Mac you'd need sudo to write to /etc/hosts)."""
