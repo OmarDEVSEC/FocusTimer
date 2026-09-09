@@ -57,8 +57,9 @@ from datetime import datetime, timedelta
 
 
 
-START_MARKER  = "# START Focus Timer - do not edit; managed by focus.py"
-END_MARKER  = "#END Focus Timer"   
+MARKER = "focustimer"
+START_MARKER  = f"# START {MARKER} - do not edit; managed by focus.py"
+END_MARKER  = f"#END {MARKER} "   
 
 # Default list of all the blocked sites for this project
 
