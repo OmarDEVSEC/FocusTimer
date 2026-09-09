@@ -61,7 +61,8 @@ MARKER = "focustimer"
 START_MARKER  = f"# START {MARKER} - do not edit; managed by focus.py"
 END_MARKER  = f"#END {MARKER} "   
 
-# Default list of all the blocked sites for this project
+# Default list of all the blocked sites for this project. Common subdomains and their variants
+#Option to add more with --add on the command line
 
 blocked_sites = [
 #Anime Site:
@@ -90,6 +91,9 @@ class C:
     SHOW_CURSOR ="\033[?25h]"
     CLEAR_LINE  ="\033[K"
 
+
+    """Platform Helpers"""
+
 def get_hosts_file() -> Path:
     """Path to the system host files"""
     if platform.system() =="Windows":
@@ -97,15 +101,18 @@ def get_hosts_file() -> Path:
     return Path("/etc/hosts")
 
 
-def countdown_timer(minutes):
-    while minutes > 0:
-        print(f"{GREEN}")
-        time.slee(1)
-        second -= 1
+def is_admin() -> bool:
+    """
+    Check wether you can edit the hosts file.
 
-        print(f"{RESET}")
-
-countdown_timer(14)
+    Not 100% reliable (permissions can be weird on some setups)
+    Enough for a pre-flight warning. The real test is the actual write, which is wrapped in 
+    try/except
+    
+    """
+    try:
+        if platform.system() == "Windows":
+            import ctypes
 
 
 
