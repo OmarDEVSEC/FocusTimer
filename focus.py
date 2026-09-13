@@ -130,9 +130,12 @@ def flush_dns() -> None:
     """
     system = platform.system()
     try:
-        if system == "Darwin":
+        if system == "Darwin":    #macos
+            # args as a list (not one string) avoids shell-parsing issues
             subprocess.run(["dscacheutil", "-flushcache"],
                            check = False,capture_output = True, timeout = 5)
+
+            #also reset mDNSResponder, which caches DNS separately
             subprocess.run(["killall", "-HUP", "mDNSResponder"],
                            check = False, capture_output = True, timeout = 5)
         elif system == "Linux":
@@ -140,16 +143,33 @@ def flush_dns() -> None:
             r = subprocess.run(["resolvectl", "flush-caches"],
                                check = False, capture_output = True, timeout = 5)
             if r.returncode != 0:
+                # Fall back to older command name if needed
                 subprocess.run(["systemd-resolve", "--flush-caches"],
                                check = False, capture_output = True, timeout = 5)
         elif system == "Windows": 
+            #shell=True needed for ipconfig on windows machines
             subprocess.run(["ipconfig", "/flushdns"],
                            check = False, capture_output = True, timeout = 5, shell = True)
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass #command not availabe - blocks still work, just delayed
 
+"""
+Libraries used above:
+    * Platform: Detect the OS("Windows", "Darwin" for mac, "Linux") so the code can branch to the right command/API for each
+    * Ctypes: Lets python call native OS level functions directly. Used here just for Windows' IsUserAnAdmin(), which Python has no built-in
+    equivalent for
+    *Os: Used for os.geteuid(), which returns the current process's effective user ID on Unix systems; 0 means root.
+    * Subprocess: Runs external command-line progrmas (dscacheutil, killall, resolvectl, ipconfig) and captures their result, since
+    flushing DN is something Python can do natively - it has to shell out to OS tools.
+"""
 
+# Hosts File Manipulations
 
+def is_active(hosts_file: Path) -> bool:
+    """Whether our block markers are currently present in the hosts file."""
+    if not hosts_file.exists();
+        return False
+    return START_MARKER in hosts_file.read_text(0)
 
 
 
