@@ -171,7 +171,37 @@ def is_active(hosts_file: Path) -> bool:
         return False
     return START_MARKER in hosts_file.read_text(0)
 
+def add_block_entries(hosts_file: Path, sites: list[str]) -> None:
+    """Add 127.0.0.1 entries for each site wrapped in BEGIN/END markers
+    
+        idempotent; if entries already exist (from a prior crashed session), they get removed first
+        and rewritten fresh.
+    """
 
+    # Remove any prior section, so we don't stack duplicates,
+    remove_block_entries(hosts_file)
+
+    # Read existing content; create the file if it somehow does not exist
+    # unlikely on real systems but keep things defensive.
+
+    if hosts_file.exists():
+        existing = hosts_file.read_text()
+        if existing and not existing.endswith("\n"):
+            existing += "\n"
+    else: 
+        existing = ""
+
+    block_lines = [START_MARKER]
+    for site in sites:
+        # 127.0.0.1 is your own machine; nothing is listening there for HTTP,
+        # So the brower will get connection refused, Simple and universal
+        block_lines.append(f"127.0.0.1 {site}")
+    block_lines.append(END_MARKER)
+    block_lines.append("") #trailing new line
+
+    hosts_file.write_text(existing + "\n".join(block_lines))
+
+ 
 
 
 
