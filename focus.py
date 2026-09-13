@@ -113,6 +113,40 @@ def is_admin() -> bool:
     try:
         if platform.system() == "Windows":
             import ctypes
+            return bool(ctypes.windll.shell32.IsUserAnAdmin())
+        return os.geteuid() == 0
+    except Exception:
+        return False
+
+
+def flush_dns() -> None:
+    """
+    Flush the OS DNS cache so hosts change take effects immediately.
+
+    Without this, sites you just blocked might still resolve for a few seconds via cached entries. 
+    Different OSes have different commands. All commands run best-effore - if flushing fails, the block still works
+    just with t a slught delay befor the browser cataches up.
+    
+    """
+    system = platform.system()
+    try:
+        if system == "Darwin":
+            subprocess.run(["dscacheutil", "-flushcache"],
+                           check = False,capture_output = True, timeout = 5)
+            subprocess.run(["killall", "-HUP", "mDNSResponder"],
+                           check = False, capture_output = True, timeout = 5)
+        elif system == "Linux":
+            # Try systemd-resolved (most modern distros)
+            r = subprocess.run(["resolvectl", "flush-caches"],
+                               check = False, capture_output = True, timeout = 5)
+            if r.returncode != 0:
+                subprocess.run(["systemd-resolve", "--flush-caches"],
+                               check = False, capture_output = True, timeout = 5)
+        elif system == "Windows": 
+            subprocess.run(["ipconfig", "/flushdns"],
+                           check = False, capture_output = True, timeout = 5, shell = True)
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass #command not availabe - blocks still work, just delayed
 
 
 
