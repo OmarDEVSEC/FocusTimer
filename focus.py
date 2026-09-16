@@ -263,6 +263,9 @@ def format_pretty_duration(seconds: int) -> str:
     return f"{hours}h {minutes}m" + (f" {sec}s" if sec else "")
 
 
+def format_end_time(end_dt: datetime) -> str:
+    """Local time at which the session ends, e.g. '4:32 PM'."""
+    return end_dt.strftime("%I:%M %p").lstrip("0")
 
 
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
