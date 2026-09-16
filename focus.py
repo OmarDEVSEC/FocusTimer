@@ -234,7 +234,17 @@ def remove_block_entries(hosts_file: Path) -> bool:
     return True
 
  
+#--------------------------------
+# Time / Display Helpers Section
+#--------------------------------
 
+def format_duration(seconds: int) -> str:
+    """Will format seconds as either 'M:SS' or 'H:MM:SS' for the countdown."""
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    if h > 0:
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m:02d}:{s:02d}"
 
 
 
