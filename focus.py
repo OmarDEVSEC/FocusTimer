@@ -167,7 +167,7 @@ Libraries used above:
 
 def is_active(hosts_file: Path) -> bool:
     """Whether our block markers are currently present in the hosts file."""
-    if not hosts_file.exists();
+    if not hosts_file.exists():
         return False
     return START_MARKER in hosts_file.read_text(0)
 
@@ -200,6 +200,38 @@ def add_block_entries(hosts_file: Path, sites: list[str]) -> None:
     block_lines.append("") #trailing new line
 
     hosts_file.write_text(existing + "\n".join(block_lines))
+
+def remove_block_entries(hosts_file: Path) -> bool:
+    """ Remove our Begin/End block form the host file. Idempotent.
+    o
+    nly removes lines between our markers. Everything else in the file
+    (include any manual entries the user added) stay exactly as is.
+
+    Returns True if anything was removed. False if the file was clean.
+    """
+    if not hosts_file.exists():
+        return False
+    content = hosts_file.read_text()
+    if START_MARKER not in content:
+        return False
+
+    lines = content.splitlines(keepends=True)
+    out_lines = []
+    inside_block = False
+    for line in lines:
+        stripped = line.rstrip("\n\r")
+        if stripped == START_MARKER:
+            inside_block = True
+            continue
+        if stripped == END_MARKER:
+            inside_block = False
+            continue
+        if not inside_block:
+            out_lines.append(line)
+    # Drop any trailing blank lines we left behind, then re-add a single \n
+    new_content = "".join(out_lines).rstrip() + "\n"
+    hosts_file.write_text(new_content)
+    return True
 
  
 
