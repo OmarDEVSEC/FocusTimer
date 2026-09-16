@@ -247,6 +247,22 @@ def format_duration(seconds: int) -> str:
     return f"{m:02d}:{s:02d}"
 
 
+def format_pretty_duration(seconds: int) -> str:
+    """Human-friendly duration for start/end messages ('25 minutes, 1H 30M')."""
+
+    seconds = int(seconds)
+    if seconds < 60:
+        return f"{seconds} second" + ("s" if seconds != 1 else "")
+    minutes, sec = divmod(seconds,60)
+    hours, minutes = divmod(minutes,60)
+    if hours == 0:
+        base = f"{minutes} minute" + ("s" if minutes != 1 else "")
+        return base + {f" {sec}s" if sec else ""}
+    if minutes == 0 and sec == 0:
+        return f"{hours} hour" + ("s" if hours != 1 else "")
+    return f"{hours}h {minutes}m" + (f" {sec}s" if sec else "")
+
+
 
 
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
