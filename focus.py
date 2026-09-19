@@ -297,6 +297,22 @@ class LiveDisplay:
         sys.stdout.flush()
 
 
+def build_countdown_view(remaining_seconds: int,
+                         num_sites: int,
+                         end_time_str: str) -> list[str]:
+    """Return the lines up to disply for the countdown at this moment."""
+    time_str = format_duration(remaining_seconds)
+    #Big centered time, with a rule above and info below.
+
+    return [
+        f"{C.DIM}━━━━━━━━━━━━━━━━━━ FOCUS SESSION ━━━━━━━━━━━━━━━━━━{C.RESET}",
+        "",
+        f"{C.BOLD}{C.BRIGHT_CYAN}                            {time_str}{C.RESET}",
+        "",
+        f"{C.DIM}   Blocking {num_sites} sites * Ends at {end_time_str}{C.RESET}",
+        f"{C.DIM}   Press Ctrl+C to end early{C.RESET}",
+        f"{C.DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}",
+    ]
 
 
 
