@@ -267,6 +267,40 @@ def format_end_time(end_dt: datetime) -> str:
     """Local time at which the session ends, e.g. '4:32 PM'."""
     return end_dt.strftime("%I:%M %p").lstrip("0")
 
+class LiveDisplay:
+    """
+    This rewrites a fixed block of lines in-place using ANSI escapes.
+
+    On each render() call, moves to the cursor up N lines (N = height of the previous
+    render), clears each line, and writes the new content. The net effect is a smooth in-place update with
+    no flicker.
+    """
+
+
+    def __init__(self):
+        self.prev_line_count = 0
+        # Hide the cursor while we're doing live redraws - looks cleaner.
+        sys.stdout.write(C.HIDE_CURSOR)
+        sys.stdout.flush()
+
+    def render(self, lines:list[str]) -> None:
+        if self.prev_line_count > 0:
+            #Move cursor up to the top of the previous block.
+            sys.stdout.write(f"\033[{self.prev_line_count}A")
+        for line in lines:
+            sys.stdout.write(C.CLEAR_LINE + line + "\n")
+        sys.stdout.flush()
+        self.prev_line_count = len(lines)
+
+    def stop(self) -> None:
+        sys.stdout.write(C.SHOW_CURSOR)
+        sys.stdout.flush()
+
+
+
+
+
+
 
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
 # Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
