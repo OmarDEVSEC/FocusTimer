@@ -314,7 +314,31 @@ def build_countdown_view(remaining_seconds: int,
         f"{C.DIM}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━{C.RESET}",
     ]
 
+def show_countdown(duration_seconds: int, num_sites: int) -> None:
+    """Run the visible countdown for the given duration.
+    
+    Uses time.monotonic() so a system clock adjustment during the session
+    (NTP sync, etc.) doesn't skew the countdown.
+    """
+    display = LiveDisplay()
+    start = time.monotonic()
+    end_time = datetime.now() + timedelta(seconds=duration_seconds)
+    end_str = format_end_time(end_time)
 
+    try:
+        while True:
+            elapsed = time.monotonic() - start
+            remaining = duration_seconds - elapsed
+            if remaining <= 0:
+                #final render at 00:00, then break.
+                display.render(build_countdown_view(0, num_sites, end_str))
+                break
+            display.render(build_countdown_view(int(round(remaining)),
+                                                num_sites, end_str))
+            #sleep to the next whole-second boundary.
+            time.sleep(max(0.05, 1 - (time.monotonic() - start % 1)))
+    finally:
+        display.stop()
 
 
 
