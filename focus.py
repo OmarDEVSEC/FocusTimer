@@ -341,6 +341,27 @@ def show_countdown(duration_seconds: int, num_sites: int) -> None:
         display.stop()
 
 
+# --------------------------------------
+#       SESSION RUNNER
+# --------------------------------------
+
+def run_session(hosts_file: Path, sites: list[str],
+                duration_seconds: int) -> None:
+    """Add blocks, run timer, remove blocks. Cleanup always runs."""
+
+    #Register cleanup before anything can fail. Runs on normal exit,
+    #Unhandled exceptions, and after our signal handlers - call sys.exit
+
+    def cleanup() -> None:
+        if remove_block_entries(hosts_file):
+            flush_dns()
+    atexit.register(cleanup)
+
+    #This function converts ctr+c into a clean sys.exit so that atexit runs
+
+    def _sig_handler(signum, frame):
+        print() #get off the countdown line.
+
 
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
 # Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
