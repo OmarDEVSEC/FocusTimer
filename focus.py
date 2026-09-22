@@ -380,6 +380,24 @@ def run_session(hosts_file: Path, sites: list[str],
         sys.exit(1)
     flush_dns()
 
+    #print startup line, then the live countdown box.
+
+    print(f"{C.GREEN}Focus session started.{C.RESET}"
+          f"{len(sites)} sites blocked for "
+          f"{format_pretty_duration(duration_seconds)}.")
+    print()
+
+    show_countdown(duration_seconds, len(sites))
+
+    # Reached the end of the timer normally. cleanup() runs via atexit
+    # and unblocks everything
+    print()
+    print(f"{C.GREEN} Sessoion complete.{C.RESET}"
+          f"{format_pretty_duration(duration_seconds)} pf focus. "
+          f"Sites unblocked.")
+
+
+
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
 # Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
 # resolves to your own machine (127.0.0.1, "localhost") instead of the real site — so any attempt to visit it just fails to load. 
