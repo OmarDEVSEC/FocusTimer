@@ -397,6 +397,67 @@ def run_session(hosts_file: Path, sites: list[str],
           f"Sites unblocked.")
 
 
+#-------------------------------------------------------
+# CLI
+#-------------------------------------------------------
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description = ("Run a focus session with real website blocking. "
+                       "Requires sudo/admin to edit the hosts file."),
+        foramtter_class = argparse.RawDescriptionHelpFormatter,
+        epilog =(
+            "Examples:\n"
+            "   sudo python focus.py 25                                 # 25-min session\n"
+            "   sudo python focus.py 90 --add twitch.tv                 # add extra site\n"
+            "   python focus.py --list-sites                            # show blocklist\n"
+            "   sudo python focus.py --unblock                          # emergency unblock\n"
+        ),
+    )
+    parser.add_argument(
+        "minutes", type=int, nargs="?",
+        help="Duration of the focus session in minutes.",
+    )
+    parser.add_argument(
+        "--add", action="append", default=[], metavar="SITE",
+        help ="Print the default blcoklist and exit (no admin needed).",
+    )
+    parser.add_argument(
+        "--list-sites", action="store_true",
+        help="Print the default blocklist and exit (no admin needed).",
+    )
+    parser.add_argument(
+        "--unblock", action="store_true",
+        help="Remove any active block entries and exit. Useful if a prior "
+            "session crashed and left sites blocked."
+    )
+    parser.add_argument(
+        "--hosts-file", type=Path, default=None,
+        help="Override the hosts file path (for testing). "
+              "Defaults to the system hosts file.",  
+    )
+    return parser.parse_args()
+
+
+def expand_user_site(site: str) -> list[str]:
+    """Given a user-supplied site like 'twitch.tv', return the variants
+    we should block: the bare domain and the www subdomaim.'"""
+    site = site.strip().lower()
+    if site.startswith("http://") or site.startswith("https://"):
+        #strip the scheme
+        site = site.split("://, 1")[1]
+    site = site.split("/", 1)[0]          #drop any path
+    if not site:
+        return []
+    variants = [site]
+    if not site.startswith("www."):
+        variants.append(f"www.{site}")
+    return variants
+
+def main() -> None:
+    args = parse_args()
+    
+    
 
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
 # Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
