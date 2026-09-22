@@ -64,7 +64,7 @@ END_MARKER  = f"#END {MARKER} "
 # Default list of all the blocked sites for this project. Common subdomains and their variants
 #Option to add more with --add on the command line
 
-blocked_sites = [
+DEFAULT_BLOCKLIST = [
 #Anime Site:
 "https://9anime.me.uk/",
 #Youtube:
@@ -456,8 +456,63 @@ def expand_user_site(site: str) -> list[str]:
 
 def main() -> None:
     args = parse_args()
-    
-    
+    hosts_file = args.hosts_file or get_hosts_file()
+
+    #Mode 1: List default sites (no admin needed)
+    if args.list_sites:
+        print(f"{C.BOLD}Default blocklist ({len(DEFAULT_BLOCKLIST)} entries): {C.RESET}")
+        for site in DEFAULT_BLOCKLIST:
+            print(f" {site}")
+        return
+
+    #Mode 2: Emergency unblock (needs admin)
+    if args.unblock:
+        if not is_admin():
+            print(f"{C.RED}Admin/root required to edit the hosts file. {C.RESET}")
+            print(f"Please rerun with sudo (Mac/Linux) or as administrator (windows)")
+            sys.exit(1)
+        if remove_block_entries(hosts_file):
+            flush_dns()
+            print(f"{C.GREEN} Removed active block section from {hosts_file}.{C.RESET}")
+        else:
+            print(f"{C.DIM} No active block section found in {hosts_file}. Nothing to do.{C.RESET}")
+        return
+
+    #Mode 3: Run a session (needs admin + a duration)
+    if args.minutes is None:
+        print(f"{C.RED}Please provide a duration in minutes. {C.RESET}")
+        print(f"Example: {C.BOLD} sudo python {sys.argv[0]} 25 {C.RESET}")
+        sys.exit(2)
+    if args.minutes <= 0:
+        print(f"{C.RED} Duration must be a positive number of minutes. {C.RESET}")
+        sys.exit(2)
+
+    if not is_admin():
+        print(f"{C.RED}Admin/root required to edit {hosts_file}.{C.RESET}")
+        print(f"Please rerun with:")
+        print(f" {C.BOLD} sudo python {sys.argv[0]} {''.join(sys.argv[1:])}{C.RESET}")
+        sys.exit(1)
+
+    #Warn if previous session left entries behind.
+
+    if is_active(hosts_file):
+        print(f"{C.YELLOW} A previous foucs session left entries in {hosts_file}.{C.RESET}")
+        print(f"{C.DIM}They'll be replaced with this session's block {C.RESET}")
+        print()
+
+    #Assemble the site list: defaults plus any --add entries (expanded).
+
+    sites = list(DEFAULT_BLOCKLIST)
+    for extra in args.add:
+        for variant in expand_user_site(extra):
+            if variant not in sites:
+                sites.append(variant)
+
+    run_session(hosts_file, sites, args.minutes * 60)
+
+
+if __name__ == "__main__":
+    main()    
 
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
 # Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
