@@ -361,7 +361,24 @@ def run_session(hosts_file: Path, sites: list[str],
 
     def _sig_handler(signum, frame):
         print() #get off the countdown line.
+        print(f"{C.YELLOW}Session interrupted. {C.RESET}"
+              f"All sites unblocked.")
+        sys.exit(128 + signum)
 
+    signal.signal(signal.SIGINT, _sig_handler)
+    if hasattr(signal, "SIGTERM"):
+        signal.signal(signal.SIGTERM, _sig_handler)
+
+    # Try to write the block. If it fails, we haven't started the timer yet.
+
+    try:
+        add_block_entries(hosts_file, sites)
+    except PermissionError:
+        print(f"{C.RED}Cannot edit {hosts_file} - permission denied. {C.RESET}")
+        print(f"Please rerun with elevated privileges:")
+        print(f" {C.BOLD}sud python {sys.argv[0]}{''.join(sys.argv[1:])}{C.RESET}")
+        sys.exit(1)
+    flush_dns()
 
 # """What the hosts file actually does, for context: it's a plain text file the OS checks before doing a DNS lookup. 
 # Each line maps a domain name to an IP address. Adding a line like 127.0.0.1 twitter.com makes your computer think twitter.com 
